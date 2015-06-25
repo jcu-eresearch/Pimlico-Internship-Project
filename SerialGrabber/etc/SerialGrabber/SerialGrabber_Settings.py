@@ -47,8 +47,6 @@ def packet_filter(packet):
         return True
     return False
 
-# reader = JSONLineFileReader("/home/eng-nbb/projects/Pimlico-Internship-Project/archive_2015_05_31-00_00_00.json", inter_record_delay=15)
-
 record_size = 12
 start_del = "".join(map(chr, range(record_size)))
 end_del = "".join(map(chr, range(record_size - 1, -1, -1)))
@@ -68,7 +66,6 @@ reader = StreamRadioReader(create_stream, port, baud,
                            escaped=True)
 
 uploader = UploadProcessor("http://api.thingspeak.com/update",
-# uploader = UploadProcessor("https://finlay.jcu.io/cgi-bin/debug_endpoint.py",
                             request_kw={'verify': False},
                             headers={'content-type': 'application/x-www-form-urlencoded'},
                             )
