@@ -23,8 +23,6 @@
 #include "DS2762.h"
 #include "DallasTemperature.h"
 #include "SoftwareSerial.h"
-#include "AB08XX_I2C.h"
-#include "PowerGizmo.h"
 
 #include <avr/sleep.h>
 #include <avr/power.h>
@@ -64,13 +62,12 @@
 
 
 bool dro_log(int repeat_count);
-bool power_gizmo_error(int repeat_count);
 
 void log_bus(uint8_t bus);
 void log_temperature(uint8_t bus, uint8_t *address);
 void log_humidity(uint8_t bus, uint8_t *address);
 void log_address(Stream* stream, uint8_t *address);
-void backup_sleep();
+void do_sleep();
 void power_up_devices();
 void power_down_devices();
 void power_down_radio();

@@ -1,5 +1,5 @@
 /*
-	Daintree Rainforest Observatory Data Logger
+	Pimlico Data Logger
 	Copyright (C) 2014 James Cook University
 
 	This program is free software: you can redistribute it and/or modify
@@ -18,9 +18,6 @@
 
 OneWire* busses[ONEWIRE_BUS_COUNT];
 DallasTemperature* temps[ONEWIRE_BUS_COUNT];
-
-AB08XX_I2C* clock;
-PowerGizmo* power;
 
 SoftwareSerial* debug;
 Stream* data;
@@ -59,11 +56,6 @@ void setup()
 	debug->println(sizeof(record_t));
 	Serial.setTimeout(5000);
 
-//	clock = new AB08XX_I2C();
-	clock = NULL;
-	power = new PowerGizmo(clock);
-	power->set(RTC.get());
-
 	PORTD |= 0x04;
     DDRD &=~ 0x04;
 	RTC.set33kHzOutput(false);
@@ -87,25 +79,7 @@ void loop()
 	power_down_devices();
 	power_down_radio();
 
-	ab08xx_tmElements_t alarm;
-	wake_up_at(power->get(), alarm);
-	if(power->wakeUpAt(alarm) == POWERGIZMO_OK)
-	{
-		did_backup_sleep = false;
-		power->powerDown();
-
-		//If this did not power down we will use on board power management.
-		debug->println("Still powered up, using backup sleep.");
-		delay(300);
-		backup_sleep();
-	}else
-	{
-		debug->println("Power Down Error");
-		if(!repeat(&power_gizmo_error, 5, 100))
-		{
-			debug->println("Failed send power gizmo error.");
-		}
-	}
+	do_sleep();
 }
 
 void INT0_ISR()
@@ -113,7 +87,7 @@ void INT0_ISR()
 
 }
 
-void backup_sleep()
+void do_sleep()
 {
 
 	tmElements_t alarm;
@@ -145,7 +119,6 @@ void backup_sleep()
 
 	did_backup_sleep = true;
 	RTC.clearAlarmFlag(3);
-	power->set(RTC.get());
 	debug->print("Woke up at: ");
 	displayDate(RTC.get(), debug);
 	debug->println();
@@ -232,11 +205,6 @@ bool dro_log(int repeat_count)
 	}
 	debug->println("ACK not received.");
 	return false;
-}
-
-bool power_gizmo_error(int repeat_count)
-{
-
 }
 
 void log_bus(uint8_t bus)
